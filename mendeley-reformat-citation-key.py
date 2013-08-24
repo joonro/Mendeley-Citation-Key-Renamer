@@ -49,64 +49,67 @@ if __name__ == '__main__':
     errors = []  # list of citations with errors
 
     for i, k in enumerate(publications):
-        if k[0]:
-            publication = k[0]
+        if not k[0]:
+            continue
 
-            if publication[:3] == 'The ':
-                publication = publication[4:]
+        publication = k[0]
 
-            if journal_abbr.has_key(publication.lower()):
-                citation_journal = journal_abbr[publication.lower()]
+        if publication[:3] == 'The ':
+            publication = publication[4:]
 
-                cur.execute(("SELECT lastName FROM DocumentContributors WHERE "
-                             "documentID = '{}'").format(documentids[i][0]))
+        if journal_abbr.has_key(publication.lower()):
+            citation_journal = journal_abbr[publication.lower()]
 
-                lastnames = cur.fetchall()[:]
+            cur.execute(("SELECT lastName FROM DocumentContributors WHERE "
+                         "documentID = '{}'").format(documentids[i][0]))
 
-                citation_author = ''
-                for j, lastname in enumerate(lastnames):
-                    if j == 3:
-                        citation_author += ' ' + 'et-al'
-                        break
+            lastnames = cur.fetchall()[:]
+
+            citation_author = ''
+            for j, lastname in enumerate(lastnames):
+                if j == 3:
+                    citation_author += ' ' + 'et-al'
+                    break
+                else:
+                    citation_author += ' ' + lastname[0]
+
+            citation = citation_author.strip() + '-' + str(years[i][0]) + '-' + citation_journal
+
+            citation = citation.lower()
+            citation = citation.replace('. ', '-')
+            citation = citation.replace(' ', '-')
+            citation = citation.replace('.', '')
+            citation = citation.replace("'", '')
+            citation = citation.replace(u'ä', 'a')
+            citation = citation.replace(u'é', 'e')
+            citation = citation.replace(u'ö', 'o')
+            citation = citation.replace(u'ø', 'o')
+            citation = citation.replace(u'ç', 'c')
+            citation = citation.replace(u'ü', 'u')
+
+            if citation != citationkeys[i][0]:
+                if not 'test-run':
+                    if citationkeys[i][0]:
+                        modified.append(citationkeys[i][0] + ' -> ' +  citation)
+
                     else:
-                        citation_author += ' ' + lastname[0]
+                        modified.append('" " -> ' +  citation)
 
-                citation = citation_author.strip() + '-' + str(years[i][0]) + '-' + citation_journal
+                else:
+                    try:
+                        cur.execute(("UPDATE Documents SET citationKey = "
+                                    "'{new}' WHERE ID = {ID}").format(new=citation,
+                                                                      ID=documentids[i][0]))
+                        modified.append(citationkeys[i][0] + ' -> ' + citation)
+                    except:
+                        #import IPython
+                        #IPython.embed(); sys.exit()
 
-                citation = citation.lower()
-                citation = citation.replace('. ', '-')
-                citation = citation.replace(' ', '-')
-                citation = citation.replace('.', '')
-                citation = citation.replace("'", '')
-                citation = citation.replace(u'ä', 'a')
-                citation = citation.replace(u'é', 'e')
-                citation = citation.replace(u'ö', 'o')
-                citation = citation.replace(u'ø', 'o')
-                citation = citation.replace(u'ç', 'c')
-                citation = citation.replace(u'ü', 'u')
+                        errors.append('error: ' + citation)
 
-                if citation != citationkeys[i][0]:
-                    if not 'test-run':
-                        if citationkeys[i][0]:
-                            modified.append(citationkeys[i][0] + ' -> ' +  citation)
-
-                        else:
-                            modified.append('" " -> ' +  citation)
-
-                    else:
-                        try:
-                            cur.execute(("UPDATE Documents SET citationKey = "
-                                        "'{new}' WHERE ID = {ID}").format(new=citation,
-                                                                          ID=documentids[i][0]))
-                            modified.append(citationkeys[i][0] + ' -> ' + citation)
-                        except:
-                            #import IPython
-                            #IPython.embed(); sys.exit()
-
-                            errors.append('error: ' + citation)
-
-            else:
-                print('no publication abbr: ' + publication + ',  documentid: ' + str(documentids[i][0]))
+        else:
+            print(('no publication abbr: {}, documentid: {}'
+                   '').format(publication, documentids[i][0]))
 
     from pprint import pprint
     pprint(modified)
