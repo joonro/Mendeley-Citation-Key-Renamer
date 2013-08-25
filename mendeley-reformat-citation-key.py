@@ -153,13 +153,13 @@ unicode_rule = {'. ': '-',
                 ' ': '-',
                 '.': '',
                 "'": '',
-                u'??': 'a',
-                u'??': 'e',
-                u'??': 'e',
-                u'??': 'o',
-                u'??': 'o',
-                u'??': 'c',
-                u'??': 'u',
+                u'ä': 'a',
+                u'é': 'e',
+                u'è': 'e',
+                u'ö': 'o',
+                u'ø': 'o',
+                u'ç': 'c',
+                u'ü': 'u',
                 }
 
 def remove_unicode(arg):
@@ -211,64 +211,65 @@ if __name__ == '__main__':
         if not k[0]:
             continue
 
-        publication = k[0]
+        journal = k[0]
 
-        if publication[:3] == 'The ':
-            publication = publication[4:]
+        # get the journal abbr
+        exception = False
+        key_journal = ''
+        for j, word in enumerate(journal.split(' ')):
+            word = word.replace('.', '')
+            word = word.replace(',', '')
+            word = word.replace(':', '')
+            try:
+                temp_abbr = abbr_rule[word.lower()]
+            except:
+                print((u'no word: {}, documentid: {}'
+                       '').format(word, documentids[i][0]))
+                exception = True
+                continue
 
-        if journal_abbr.has_key(publication.lower()):
-            citation_journal = journal_abbr[publication.lower()]
+            if len(temp_abbr):
+                key_journal += abbr_rule[word.lower()] + '-'
 
-            cur.execute(("SELECT lastName FROM DocumentContributors WHERE "
-                         "documentID = '{}'").format(documentids[i][0]))
+        if exception:
+            continue
 
-            lastnames = cur.fetchall()[:]
+        key_journal = key_journal[:-1]
 
-            citation_author = ''
-            for j, lastname in enumerate(lastnames):
-                if j == 3:
-                    citation_author += ' ' + 'et-al'
-                    break
+        cur.execute(("SELECT lastName FROM DocumentContributors WHERE "
+                     "documentID = '{}'").format(documentids[i][0]))
+
+        lastnames = cur.fetchall()[:]
+
+        key_author = ''
+        for j, lastname in enumerate(lastnames):
+            if j == 3:
+                key_author += ' ' + 'et-al'
+                break
+            else:
+                key_author += ' ' + lastname[0]
+
+        key_author = key_author.strip().lower()
+
+        key_author = remove_unicode(key_author)
+        key_journal = remove_unicode(key_journal)
+
+        citation = '{}-{}-{}'.format(key_author, years[i][0], key_journal)
+
+        if citation != citationkeys[i][0]:
+            if not 'test-run':
+                if citationkeys[i][0]:
+                    modified.append(citationkeys[i][0] + ' -> ' +  citation)
                 else:
-                    citation_author += ' ' + lastname[0]
-
-            citation = citation_author.strip() + '-' + str(years[i][0]) + '-' + citation_journal
-
-            citation = citation.lower()
-            citation = citation.replace('. ', '-')
-            citation = citation.replace(' ', '-')
-            citation = citation.replace('.', '')
-            citation = citation.replace("'", '')
-            citation = citation.replace(u'ä', 'a')
-            citation = citation.replace(u'é', 'e')
-            citation = citation.replace(u'ö', 'o')
-            citation = citation.replace(u'ø', 'o')
-            citation = citation.replace(u'ç', 'c')
-            citation = citation.replace(u'ü', 'u')
-
-            if citation != citationkeys[i][0]:
-                if not 'test-run':
-                    if citationkeys[i][0]:
-                        modified.append(citationkeys[i][0] + ' -> ' +  citation)
-
-                    else:
-                        modified.append('" " -> ' +  citation)
-
-                else:
-                    try:
-                        cur.execute(("UPDATE Documents SET citationKey = "
-                                    "'{new}' WHERE ID = {ID}").format(new=citation,
-                                                                      ID=documentids[i][0]))
-                        modified.append(citationkeys[i][0] + ' -> ' + citation)
-                    except:
-                        #import IPython
-                        #IPython.embed(); sys.exit()
-
-                        errors.append('error: ' + citation)
-
-        else:
-            print(('no publication abbr: {}, documentid: {}'
-                   '').format(publication, documentids[i][0]))
+                    modified.append('" " -> ' +  citation)
+            else:
+                try:
+                    cur.execute(("UPDATE Documents SET citationKey = "
+                                "'{new}' WHERE ID = {ID}").format(new=citation,
+                                                                  ID=documentids[i][0]))
+                    modified.append(citationkeys[i][0] + ' -> ' + citation)
+                except:
+                    errors.append('error: ' + citation)
 
     from pprint import pprint
     pprint(modified)
