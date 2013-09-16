@@ -199,31 +199,26 @@ if __name__ == '__main__':
         print('Fixed the following localUrl(s):')
         pprint(localUrls)
 
-    cur.execute("SELECT citationKey FROM Documents")
-    citationkeys = cur.fetchall()[:]
-
-    cur.execute("SELECT publication FROM Documents")
-    publications = cur.fetchall()[:]
-
     cur.execute("SELECT id FROM Documents")
     documentids = cur.fetchall()[:]
-
-    cur.execute("SELECT year FROM Documents")
-    years = cur.fetchall()[:]
 
     modified = []  # list of modified citations
     errors = []  # list of citations with errors
 
-    for i, k in enumerate(publications):
-        if not k[0]:
-            continue
+    for i, k in enumerate(documentids):
+        docid = k[0]
+        cur.execute(("SELECT publication FROM Documents WHERE "
+                     "id='{}'").format(docid))
 
-        journal = k[0]
+        publication = cur.fetchall()[:][0][0]
+
+        if not publication:
+            continue
 
         # get the journal abbr
         exception = False
-        key_journal = ''
-        for j, word in enumerate(journal.split(' ')):
+        key_publication = ''
+        for j, word in enumerate(publication.split(' ')):
             word = word.replace('.', '')
             word = word.replace(',', '')
             word = word.replace(':', '')
@@ -231,20 +226,20 @@ if __name__ == '__main__':
                 temp_abbr = abbr_rule[word.lower()]
             except:
                 print((u'no word: {}, documentid: {}'
-                       '').format(word, documentids[i][0]))
+                       '').format(remove_unicode(word), docid))
                 exception = True
                 continue
 
             if len(temp_abbr):
-                key_journal += abbr_rule[word.lower()] + '-'
+                key_publication += abbr_rule[word.lower()] + '-'
 
         if exception:
             continue
 
-        key_journal = key_journal[:-1]
+        key_publication = key_publication[:-1]
 
         cur.execute(("SELECT lastName FROM DocumentContributors WHERE "
-                     "documentID = '{}'").format(documentids[i][0]))
+                     "documentID='{}'").format(docid))
 
         lastnames = cur.fetchall()[:]
 
@@ -259,24 +254,34 @@ if __name__ == '__main__':
         key_author = key_author.strip().lower()
 
         key_author = remove_unicode(key_author)
-        key_journal = remove_unicode(key_journal)
+        key_publication = remove_unicode(key_publication)
 
-        citation = '{}-{}-{}'.format(key_author, years[i][0], key_journal)
+        cur.execute(("SELECT year FROM Documents WHERE "
+                     "id='{}'").format(docid))
 
-        if citation != citationkeys[i][0]:
+        year = cur.fetchall()[:][0][0]
+
+        citationkey = '{}-{}-{}'.format(key_author, year, key_publication)
+
+        cur.execute(("SELECT citationKey FROM Documents WHERE "
+                     "id='{}'").format(docid))
+
+        citationkey_old = cur.fetchall()[:][0][0]
+
+        if citationkey != citationkey_old:
             if not 'test-run':
-                if citationkeys[i][0]:
-                    modified.append(citationkeys[i][0] + ' -> ' +  citation)
+                if citationkey_old:
+                    modified.append(citationkey_old + ' -> ' +  citationkey)
                 else:
-                    modified.append('" " -> ' +  citation)
+                    modified.append('" " -> ' +  citationkey)
             else:
                 try:
-                    cur.execute(("UPDATE Documents SET citationKey = "
-                                "'{new}' WHERE ID = {ID}").format(new=citation,
-                                                                  ID=documentids[i][0]))
-                    modified.append(citationkeys[i][0] + ' -> ' + citation)
+                    cur.execute(("UPDATE Documents SET citationKey="
+                                "'{new}' WHERE ID={ID}").format(new=citationkey,
+                                                                ID=docid))
+                    modified.append(citationkey_old + ' -> ' + citationkey)
                 except:
-                    errors.append('error: ' + citation)
+                    errors.append('error: ' + citationkey)
 
     from pprint import pprint
     pprint(modified)
