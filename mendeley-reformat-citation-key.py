@@ -1,4 +1,5 @@
 # This Python file uses the following encoding: utf-8
+import os
 import apsw
 import re
 
@@ -177,12 +178,12 @@ if __name__ == '__main__':
     '''
     change Mendeley citation key to author-author-year-journalabbr format
     '''
+    if os.name == 'nt':
+        path_db = r'\home\joon\AppData\Local\Mendeley Ltd\Mendeley Desktop\joonhyoung.ro@gmail.com@www.mendeley.com.sqlite'
+    else:
+        path_db = '/home/joon/.local/share/data/Mendeley Ltd./Mendeley Desktop/joonhyoung.ro@gmail.com@www.mendeley.com.sqlite'
 
-    # load journal abbr data
-    with open('/home/joon/Dropbox/python/journal-abbr.txt', 'rb') as f:
-        journal_abbr = {line.strip().split(': ')[0].lower(): line.strip().split(': ')[1].lower()  for line in f}
-
-    con = apsw.Connection('/home/joon/.local/share/data/Mendeley Ltd./Mendeley Desktop/joonhyoung.ro@gmail.com@www.mendeley.com.sqlite')
+    con = apsw.Connection(path_db)
 
     con.createscalarfunction("REGEXP", regexp)
 
