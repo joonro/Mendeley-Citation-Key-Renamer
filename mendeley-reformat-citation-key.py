@@ -289,7 +289,6 @@ if __name__ == '__main__':
 
 
 if not 'other stuff':
-
     if re.search(r'([a-z]+)(\d+)', k[0], re.UNICODE|re.IGNORECASE):
         new = re.sub(r'([a-z]+)(\d+).+', r'\1-\2', k[0], re.UNICODE, re.IGNORECASE)
 
@@ -300,9 +299,10 @@ if not 'other stuff':
             new = new.replace(' ', '-')
             new = new.replace('.', '')
 
-            cur.execute("UPDATE {table} SET citationKey = '{new}' WHERE ID = {ID}".format(table = table, new = new, ID = documentids[i][0]))
+            cur.execute(("UPDATE {table} SET citationKey='{new}' WHERE ID={ID}"
+                        ).format(table=table, new=new, ID=docid))
 
-            print('{old} -> {new}'.format(old = k[0], new = new) )
+            print('{old} -> {new}'.format(old=k[0], new=new) )
 
         except:
             print(k[0])
@@ -322,9 +322,9 @@ if not 'other stuff':
                     new = new.replace(' ', '-')
                     new = new.replace('.', '')
 
-                    cur.execute("UPDATE {table} SET citationKey = '{new}' WHERE ID = {ID}".format(table = table, new = new, ID = documentids[i][0]))
+                    cur.execute("UPDATE {table} SET citationKey='{new}' WHERE ID={ID}".format(table=table, new=new, ID=docid))
 
-                    print('{old} -> {new}'.format(old = k[0], new = new) )
+                    print('{old} -> {new}'.format(old=k[0], new=new) )
 
                 except:
                     print(k[0])
@@ -347,23 +347,23 @@ if not 'other stuff':
                 if k[0].find(new) != -1:
                     new = k[0][:-len(new)/2]
 
-                    cur.execute("UPDATE {table} SET citationKey = '{new}' WHERE ID = {ID}".format(table = table, new = new, ID = documentids[i][0]))
+                    cur.execute("UPDATE {table} SET citationKey='{new}' WHERE ID={ID}".format(table=table, new=new, ID=docid))
 
-                    print('{old} -> {new}'.format(old = k[0], new = new) )
+                    print('{old} -> {new}'.format(old=k[0], new=new) )
 
             except:
                 print(k[0])
 
 
     cur.execute("SELECT tag from DocumentTags where tag REGEXP 'class-[0-9]'")
-    cur.execute("SELECT citationKey FROM Documents WHERE citationKey REGEXP ?", (r'[A-Z][a-z]+[0-9]+', ))
+    cur.execute("SELECT citationKey FROM Documents WHERE citationKey REGEXP {}".format(r'[A-Z][a-z]+[0-9]+', ))
 
-    cur.execute("SELECT citationKey FROM Documents WHERE citationKey REGEXP ?", ('W[a-z]+1995',))
+    cur.execute("SELECT citationKey FROM Documents WHERE citationKey REGEXP {}".format('W[a-z]+1995',))
 
     cur.execute("SELECT tag from DocumentTags where tag like '%Class%'")
     pprint(cur.fetchall())
 
-    cur.execute("UPDATE DocumentTags set tag = ? where tag = ?", ('class-9', 'Class_9'))
+    cur.execute("UPDATE DocumentTags set tag={} where tag={}".format('class-9', 'Class_9'))
     cur.execute("SELECT tag from DocumentTags where tag like '%Class%'")
 
     cur.execute("SELECT citationKey from Documents")
