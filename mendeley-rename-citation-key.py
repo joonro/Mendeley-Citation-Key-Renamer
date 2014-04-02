@@ -390,3 +390,4 @@ if not 'obsolete':
 
     cur.execute("SELECT citationKey from Documents")
     pprint(cur.fetchall())
+
