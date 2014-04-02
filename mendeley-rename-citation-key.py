@@ -200,7 +200,7 @@ if __name__ == '__main__':
     sqlite = 'joonhyoung.ro@gmail.com@www.mendeley.com.sqlite'  # change
 
     if os.name == 'nt':
-        path_db = r'\home\joon\AppData\Local\Mendeley Ltd\Mendeley Desktop\{}'.format(sqlite)
+        path_db = r'\Users\joon\AppData\Local\Mendeley Ltd\Mendeley Desktop\{}'.format(sqlite)
     else:
         path_db = '/home/joon/.local/share/data/Mendeley Ltd./Mendeley Desktop/'.format(sqlite)
 
