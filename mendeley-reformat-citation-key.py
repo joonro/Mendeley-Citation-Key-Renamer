@@ -190,17 +190,19 @@ unicode_rule = {'. ': '-',
 
 def remove_unicode(arg):
     for a_unicode in unicode_rule.keys():
-      arg = arg.replace(a_unicode, unicode_rule[a_unicode])
+        arg = arg.replace(a_unicode, unicode_rule[a_unicode])
     return(arg)
 
 if __name__ == '__main__':
     '''
     change Mendeley citation key to author-author-year-journalabbr format
     '''
+    sqlite = 'joonhyoung.ro@gmail.com@www.mendeley.com.sqlite'  # change
+
     if os.name == 'nt':
-        path_db = r'\home\joon\AppData\Local\Mendeley Ltd\Mendeley Desktop\joonhyoung.ro@gmail.com@www.mendeley.com.sqlite'
+        path_db = r'\home\joon\AppData\Local\Mendeley Ltd\Mendeley Desktop\{}'.format(sqlite)
     else:
-        path_db = '/home/joon/.local/share/data/Mendeley Ltd./Mendeley Desktop/joonhyoung.ro@gmail.com@www.mendeley.com.sqlite'
+        path_db = '/home/joon/.local/share/data/Mendeley Ltd./Mendeley Desktop/'.format(sqlite)
 
     con = apsw.Connection(path_db)
 
@@ -244,8 +246,9 @@ if __name__ == '__main__':
             try:
                 temp_abbr = abbr_rule[word.lower()]
             except:
-                print((u'no word: {}, documentid: {}'
-                       '').format(remove_unicode(word), docid))
+                print((u'no word: "{}" in {}'
+                       '').format(remove_unicode(word),
+                           remove_unicode(publication)))
                 exception = True
                 continue
 
@@ -307,7 +310,7 @@ if __name__ == '__main__':
     pprint(errors)
 
 
-if not 'other stuff':
+if not 'obsolete':
     if re.search(r'([a-z]+)(\d+)', k[0], re.UNICODE|re.IGNORECASE):
         new = re.sub(r'([a-z]+)(\d+).+', r'\1-\2', k[0], re.UNICODE, re.IGNORECASE)
 
@@ -321,7 +324,7 @@ if not 'other stuff':
             cur.execute(("UPDATE {table} SET citationKey='{new}' WHERE ID={ID}"
                         ).format(table=table, new=new, ID=docid))
 
-            print('{old} -> {new}'.format(old=k[0], new=new) )
+            print('{old} -> {new}'.format(old=k[0], new=new))
 
         except:
             print(k[0])
