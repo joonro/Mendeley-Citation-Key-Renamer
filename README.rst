@@ -25,6 +25,10 @@ Usage
        else:
            path_db = '/home/joon/.local/share/data/Mendeley Ltd./Mendeley Desktop/'.format(sqlite)
 
+* Also, to maintain the same `localURL` across Windows and GNU/Linux, I have a
+  junction at `C:\home` which points at `C:\Users`. You can either make the
+  junction or modify the source code before running this script.
+
 * To use, with Mendeley closed, run it with ``python``::
    
    python /path/to/mendeley-rename-citation-key.py
