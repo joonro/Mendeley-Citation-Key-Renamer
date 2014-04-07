@@ -67,7 +67,7 @@ if __name__ == '__main__':
 
     for i, k in enumerate(documentids):
         docid = k[0]
-        cur.execute(("SELECT publication FROM Documents WHERE "
+        cur.execute(("SELECT Publication FROM Documents WHERE "
                      "id='{}'").format(docid))
 
         publication = cur.fetchall()[:][0][0]
