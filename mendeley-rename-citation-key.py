@@ -67,37 +67,41 @@ if __name__ == '__main__':
 
     for i, k in enumerate(documentids):
         docid = k[0]
-        cur.execute(("SELECT publication FROM Documents WHERE "
+        cur.execute(("SELECT Publication FROM Documents WHERE "
                      "id='{}'").format(docid))
 
         publication = cur.fetchall()[:][0][0]
 
-        if not publication:
-            continue
+        if publication:
+            # get the journal abbr
+            exception = False
+            key_publication = ''
+            for j, word in enumerate(publication.split(' ')):
+                word = word.replace('.', '')
+                word = word.replace(',', '')
+                word = word.replace(':', '')
+                try:
+                    temp_abbr = abbr_rule[word.lower()]
+                except:
+                    print((u'no word: "{}" in {}'
+                           '').format(remove_unicode(word),
+                               remove_unicode(publication)))
+                    exception = True
+                    continue
 
-        # get the journal abbr
-        exception = False
-        key_publication = ''
-        for j, word in enumerate(publication.split(' ')):
-            word = word.replace('.', '')
-            word = word.replace(',', '')
-            word = word.replace(':', '')
-            try:
-                temp_abbr = abbr_rule[word.lower()]
-            except:
-                print((u'no word: "{}" in {}'
-                       '').format(remove_unicode(word),
-                           remove_unicode(publication)))
-                exception = True
+                if len(temp_abbr):
+                    key_publication += abbr_rule[word.lower()] + '-'
+
+            key_publication = key_publication[:-1]
+
+            if exception:
                 continue
-
-            if len(temp_abbr):
-                key_publication += abbr_rule[word.lower()] + '-'
-
-        if exception:
-            continue
-
-        key_publication = key_publication[:-1]
+        else:
+            cur.execute(("SELECT Type FROM Documents WHERE "
+                         "id='{}'").format(docid))
+            item_type = cur.fetchall()[:][0][0]
+            if item_type == "Book":
+                key_publication = "book"
 
         cur.execute(("SELECT lastName FROM DocumentContributors WHERE "
                      "documentID='{}'").format(docid))
