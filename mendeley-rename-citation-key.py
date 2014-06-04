@@ -4,6 +4,7 @@ import apsw
 import re
 
 from pprint import pprint
+from titlecase import titlecase
 
 from abbr_rule import abbr_rule
 
@@ -21,6 +22,7 @@ unicode_rule = {'. ': '-',
                 u'è': 'e',
                 u'í': 'i',
                 u'ö': 'o',
+                u'Ö': 'o',
                 u'ø': 'o',
                 u'ç': 'c',
                 u'ü': 'u',
@@ -90,7 +92,7 @@ if __name__ == '__main__':
                     continue
 
                 if len(temp_abbr):
-                    key_publication += abbr_rule[word.lower()] + '-'
+                    key_publication += abbr_rule[word.lower()].title() + '_'
 
             key_publication = key_publication[:-1]
 
@@ -116,7 +118,7 @@ if __name__ == '__main__':
             else:
                 key_author += ' ' + lastname[0]
 
-        key_author = key_author.strip().lower()
+        key_author = key_author.strip().title()
 
         key_author = remove_unicode(key_author)
         key_publication = remove_unicode(key_publication)
@@ -126,7 +128,7 @@ if __name__ == '__main__':
 
         year = cur.fetchall()[:][0][0]
 
-        citationkey = '{}-{}-{}'.format(key_author, year, key_publication)
+        citationkey = '{}_{}_{}'.format(key_author, year, key_publication)
 
         cur.execute(("SELECT citationKey FROM Documents WHERE "
                      "id='{}'").format(docid))
@@ -142,11 +144,28 @@ if __name__ == '__main__':
             else:
                 try:
                     cur.execute(("UPDATE Documents SET citationKey="
-                                "'{new}' WHERE ID={ID}").format(new=citationkey,
-                                                                ID=docid))
+                        "'{new}' WHERE ID={ID}").format(new=citationkey,
+                                                        ID=docid))
                     modified.append(citationkey_old + ' -> ' + citationkey)
                 except:
                     errors.append('error: ' + citationkey)
+
+        # titlecase(title)
+        cur.execute(("SELECT Title FROM Documents WHERE "
+                     "id='{}'").format(docid))
+
+        title = cur.fetchall()[:][0][0]
+        titlecased = titlecase(title)
+
+        if title != titlecased:
+            newtitle = titlecased.replace("'", "''")
+
+            try:
+                cur.execute(("UPDATE Documents SET Title="
+                    "'{title}' WHERE ID={ID}").format(title=newtitle, ID=docid))
+                modified.append(title + ' -> ' + titlecased)
+            except:
+                errors.append('error: ' + title)
 
     from pprint import pprint
     pprint(modified)
