@@ -4,6 +4,7 @@ import apsw
 import re
 
 from pprint import pprint
+from titlecase import titlecase
 
 from abbr_rule import abbr_rule
 
@@ -147,6 +148,23 @@ if __name__ == '__main__':
                     modified.append(citationkey_old + ' -> ' + citationkey)
                 except:
                     errors.append('error: ' + citationkey)
+
+        # titlecase(title)
+        cur.execute(("SELECT Title FROM Documents WHERE "
+                     "id='{}'").format(docid))
+
+        title = cur.fetchall()[:][0][0]
+        titlecased = titlecase(title)
+
+        if title != titlecased:
+            newtitle = titlecased.replace("'", "''")
+
+            try:
+                cur.execute(("UPDATE Documents SET Title="
+                    "'{title}' WHERE ID={ID}").format(title=newtitle, ID=docid))
+                modified.append(title + ' -> ' + titlecased)
+            except:
+                errors.append('error: ' + title)
 
     from pprint import pprint
     pprint(modified)
