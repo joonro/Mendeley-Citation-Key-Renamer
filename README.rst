@@ -3,15 +3,15 @@ Mendeley-Citation-Key-Renamer
 =============================
 
 Automatically renames citation keys for `Mendeley <http://www.mendeley.com/>`_
-reference manager. It will automatically generate citation keys by ``author-
-year-journal-abbreviation`` format. For example, for the following citation:
+reference manager. It will automatically generate citation keys by ``Author_
+Year_Journal_Abbreviation`` format. For example, for the following citation:
 
    Porter, R. H. (1981). A study of cartel stability : the Joint Executive
    Committee , 1880-1886. Bell Journal of Economics, (November), 1880–1886.
 
 it will generate the following citation keys::
 
-   porter-1981-bell-j-econ
+   Porter_1981_Bell_J_Econ
 
 and update the sqlite database for Mendeley. It will use pre-defined rules to
 generate Journal abbreviation.
@@ -53,3 +53,4 @@ Download
 .. code-block:: sh
 
     git clone https://github.com/joonro/Mendeley-Citation-Key-Renamer.git
+
