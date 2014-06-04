@@ -144,8 +144,8 @@ if __name__ == '__main__':
             else:
                 try:
                     cur.execute(("UPDATE Documents SET citationKey="
-                                "'{new}' WHERE ID={ID}").format(new=citationkey,
-                                                                ID=docid))
+                        "'{new}' WHERE ID={ID}").format(new=citationkey,
+                                                        ID=docid))
                     modified.append(citationkey_old + ' -> ' + citationkey)
                 except:
                     errors.append('error: ' + citationkey)
