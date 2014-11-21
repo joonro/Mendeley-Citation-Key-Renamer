@@ -172,7 +172,7 @@ if __name__ == '__main__':
     pprint(errors)
 
 
-if not 'obsolete':
+if False:  # obsolete code
     if re.search(r'([a-z]+)(\d+)', k[0], re.UNICODE|re.IGNORECASE):
         new = re.sub(r'([a-z]+)(\d+).+', r'\1-\2', k[0], re.UNICODE, re.IGNORECASE)
 
