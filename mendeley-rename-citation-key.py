@@ -113,12 +113,12 @@ if __name__ == '__main__':
         key_author = ''
         for j, lastname in enumerate(lastnames):
             if j == 3:
-                key_author += ' ' + 'et-al'
+                key_author += '_' + 'et-al'
                 break
             else:
-                key_author += ' ' + lastname[0]
+                key_author += '_' + lastname[0]
 
-        key_author = key_author.strip().title()
+        key_author = key_author.strip()[1:]
 
         key_author = remove_unicode(key_author)
         key_publication = remove_unicode(key_publication)
