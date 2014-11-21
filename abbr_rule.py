@@ -1,5 +1,6 @@
 abbr_rule = {'&': '',
              'academy': 'acad',
+             'accident': 'accid',
              'acm': 'acm',
              'acta': 'acta',
              'advances': 'advances',
